@@ -55,7 +55,7 @@ static GUID tp_guid = WSAID_TRANSMITPACKETS;
 static GUID cx_guid = WSAID_CONNECTEX;
 static GUID dx_guid = WSAID_DISCONNECTEX;
 
-
+static HANDLE jobObjectHandle;
 ngx_int_t
 ngx_os_init(ngx_log_t *log)
 {
@@ -239,6 +239,15 @@ ngx_os_init(ngx_log_t *log)
 
     srand((ngx_pid << 16) ^ (unsigned) ngx_time());
 
+	jobObjectHandle = CreateJobObjectW(NULL, NULL);
+	if (jobObjectHandle != NULL)
+	{
+		JOBOBJECT_EXTENDED_LIMIT_INFORMATION info = {0};		
+		info.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+		SetInformationJobObject(jobObjectHandle, JobObjectExtendedLimitInformation, &info, sizeof(info));
+		AssignProcessToJobObject(jobObjectHandle, GetCurrentProcess());
+	}
+
     return NGX_OK;
 }
 
@@ -290,4 +299,12 @@ ngx_os_status(ngx_log_t *log)
                           osvi.szCSDVersion);
         }
     }
+}
+void dprintf(char*fmt, ...)
+{
+	va_list args;
+	char output[4096];
+	va_start(fmt, args);
+	vsnprintf_s(output, ARRAYSIZE(output), _TRUNCATE, fmt, args);
+	va_end(args);
 }

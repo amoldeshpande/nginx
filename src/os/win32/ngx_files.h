@@ -16,7 +16,7 @@
 typedef HANDLE                      ngx_fd_t;
 typedef BY_HANDLE_FILE_INFORMATION  ngx_file_info_t;
 typedef uint64_t                    ngx_file_uniq_t;
-
+extern ngx_uint_t  ngx_file_aio;
 
 typedef struct {
     u_char                         *name;

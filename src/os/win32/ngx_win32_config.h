@@ -11,8 +11,7 @@
 
 #undef  WIN32
 #define WIN32         0x0400
-#define _WIN32_WINNT  0x0501
-
+#define _WIN32_WINNT  _WIN32_WINNT_WINBLUE 
 
 #define STRICT
 #define WIN32_LEAN_AND_MEAN
@@ -57,9 +56,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#ifdef __MINGW64_VERSION_MAJOR
 #include <stdint.h>
-#endif
 #include <ctype.h>
 #include <locale.h>
 
@@ -96,6 +93,9 @@ typedef long  time_t;
 /* array is too small to include a terminating null character */
 #pragma warning(disable:4295)
 
+#if defined(_WIN64)
+#pragma warning(disable:4267 4244) // MSVC 64-bit down-conversion warnings. TODO later
+#endif
 #endif
 
 
@@ -151,7 +151,7 @@ typedef unsigned short int  uint16_t;
 typedef __int64             int64_t;
 typedef unsigned __int64    uint64_t;
 
-#if !defined(__WATCOMC__) && !defined(__MINGW64_VERSION_MAJOR)
+#if !defined(__WATCOMC__) && !defined(__MINGW64_VERSION_MAJOR) && !defined(_WIN64)
 typedef int                 intptr_t;
 typedef u_int               uintptr_t;
 #endif
@@ -192,7 +192,6 @@ typedef int                 ssize_t;
 typedef uint32_t            in_addr_t;
 typedef u_short             in_port_t;
 typedef int                 sig_atomic_t;
-
 
 #ifdef _WIN64
 
@@ -261,5 +260,13 @@ typedef int                 sig_atomic_t;
 #define ngx_random               rand
 #define ngx_debug_init()
 
-
+#define NGX_STAT_STUB 1
+#define NGX_HAVE_INET6 1
+#define NGX_OPENSSL 1
+#define NGX_HTTP_SSL 1
+#define NGX_SSL 1
+#define NGX_HTTP_REALIP 1
+#define NGX_HTTP_DAV 1
+#define NGX_HTTP_V2 1
+#define NGX_HTTP_DEGRADATION 1
 #endif /* _NGX_WIN32_CONFIG_H_INCLUDED_ */

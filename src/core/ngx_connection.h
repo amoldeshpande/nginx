@@ -187,6 +187,7 @@ struct ngx_connection_s {
 
 #if (NGX_HAVE_IOCP)
     unsigned            accept_context_updated:1;
+	char				recvbuf[1024];
 #endif
 
 #if (NGX_HAVE_AIO_SENDFILE)

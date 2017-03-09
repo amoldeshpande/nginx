@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <NginxRoot>$(SolutionDir)..\..</NginxRoot>
+    <LibXmlDir>$(NginxRoot)\..\libxml2</LibXmlDir>
+    <LibXsltDir>$(NginxRoot)\..\libxslt</LibXsltDir>
+    <iconvDir>$(NginxRoot)\..\iconv-for-windows</iconvDir>
+	<openssl>$(NginxRoot)\..\openssl-msft</openssl>
+<pcre>$(NginxRoot)\..\pcre\pcre-8.39\build</pcre>
+<zlibdir>$(NginxRoot)\..\zlib-1.2.8</zlibdir>
+
+   </PropertyGroup>
+  <PropertyGroup />
+  <ItemDefinitionGroup >
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)..;$(NginxRoot)\src\core;$(NginxRoot)\src\event;$(NginxRoot)\src\event\modules;$(NginxRoot)\src\os\win32;$(NginxRoot)\src\http;$(NginxRoot)\src\http\modules;$(NginxRoot)\src\http\v2;$(LibXmlDir)\include;$(LibXsltDir);$(iconvDir)\include;$(openssl)\include;$(pcre);$(zlibdir);</AdditionalIncludeDirectories>
+    </ClCompile>
+	<Link>
+      <AdditionalLibraryDirectories>$(pcre)\Release;$(openssl)\out32;$(LibXmlDir)\win32\bin.msvc;$(LibXsltDir)\win32\bin.msvc;$(zlibdir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+		<AdditionalDependencies>ws2_32.lib;advapi32.lib;user32.lib;gdi32.lib;crypt32.lib;libeay32.lib;ssleay32.lib;libxml2.lib;libxslt.lib;zlib.lib;pcre.lib;pcrecpp.lib;</AdditionalDependencies>
+	</Link>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>

@@ -97,6 +97,7 @@ ngx_overlapped_wsarecv(ngx_connection_t *c, u_char *buf, size_t size)
                            "WSARecv ovlp: fd:%d %ul of %z",
                            c->fd, rev->available, size);
 
+			memcpy(buf, c->recvbuf, rev->available);
             return rev->available;
         }
 
@@ -116,9 +117,10 @@ ngx_overlapped_wsarecv(ngx_connection_t *c, u_char *buf, size_t size)
     }
 
     ovlp = (LPWSAOVERLAPPED) &rev->ovlp;
+	rev->ovlp.flags = NGX_READ_EVENT;
     ngx_memzero(ovlp, sizeof(WSAOVERLAPPED));
-    wsabuf[0].buf = (char *) buf;
-    wsabuf[0].len = size;
+    wsabuf[0].buf = c->recvbuf;
+    wsabuf[0].len = ngx_min(size, ARRAYSIZE(c->recvbuf));
     flags = 0;
     bytes = 0;
 
@@ -147,24 +149,14 @@ ngx_overlapped_wsarecv(ngx_connection_t *c, u_char *buf, size_t size)
 
         return n;
     }
-
-    if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
-
-        /*
-         * if a socket was bound with I/O completion port
-         * then GetQueuedCompletionStatus() would anyway return its status
-         * despite that WSARecv() was already complete
-         */
-
-        rev->active = 1;
-        return NGX_AGAIN;
-    }
+    
 
     if (bytes == 0) {
         rev->eof = 1;
         rev->ready = 0;
 
     } else {
+		ngx_memcpy(buf, c->recvbuf, bytes);
         rev->ready = 1;
     }
 

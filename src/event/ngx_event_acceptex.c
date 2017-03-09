@@ -45,6 +45,8 @@ ngx_event_acceptex(ngx_event_t *rev)
         c->accept_context_updated = 1;
     }
 
+	SetFileCompletionNotificationModes((HANDLE)c->fd, FILE_SKIP_COMPLETION_PORT_ON_SUCCESS);
+
     ngx_getacceptexsockaddrs(c->buffer->pos,
                              ls->post_accept_buffer_size,
                              ls->socklen + 16,
@@ -79,6 +81,8 @@ ngx_event_acceptex(ngx_event_t *rev)
     ngx_event_post_acceptex(ls, 1);
 
     c->number = ngx_atomic_fetch_add(ngx_connection_counter, 1);
+	c->read->ready = 1;
+	c->write->ready = 1;
 
     ls->handler(c);
 
@@ -174,11 +178,11 @@ ngx_event_post_acceptex(ngx_listening_t *ls, ngx_uint_t n)
         rev->log = c->log;
         wev->log = c->log;
 
-        if (ngx_add_event(rev, 0, NGX_IOCP_IO) == NGX_ERROR) {
+        if (ngx_add_event(rev, NGX_CREATE_IOCP_EVENT, NGX_IOCP_ACCEPT) == NGX_ERROR) {
             ngx_close_posted_connection(c);
             return NGX_ERROR;
         }
-
+		rev->ovlp.flags = NGX_ACCEPT_EVENT;
         if (ngx_acceptex(ls->fd, s, c->buffer->pos, ls->post_accept_buffer_size,
                          ls->socklen + 16, ls->socklen + 16,
                          &rcvd, (LPOVERLAPPED) &rev->ovlp)

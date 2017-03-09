@@ -12,6 +12,9 @@
 #include <ngx_config.h>
 #include <ngx_core.h>
 
+#if (NGX_WIN32)
+#define PCRE_STATIC
+#endif
 #include <pcre.h>
 
 

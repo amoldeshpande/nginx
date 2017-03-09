@@ -44,7 +44,7 @@ typedef volatile ngx_atomic_uint_t  ngx_atomic_t;
 #define ngx_atomic_fetch_add(p, add) InterlockedExchangeAdd((long *) p, add)
 
 
-#define ngx_memory_barrier()
+#define ngx_memory_barrier()  MemoryBarrier()
 
 
 #if defined( __BORLANDC__ ) || ( __WATCOMC__ < 1230 )

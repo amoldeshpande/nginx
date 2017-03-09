@@ -263,68 +263,87 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
 ngx_int_t
 ngx_handle_read_event(ngx_event_t *rev, ngx_uint_t flags)
 {
-    if (ngx_event_flags & NGX_USE_CLEAR_EVENT) {
+	if (ngx_event_flags & NGX_USE_CLEAR_EVENT) {
 
-        /* kqueue, epoll */
+		/* kqueue, epoll */
 
-        if (!rev->active && !rev->ready) {
-            if (ngx_add_event(rev, NGX_READ_EVENT, NGX_CLEAR_EVENT)
-                == NGX_ERROR)
-            {
-                return NGX_ERROR;
-            }
-        }
+		if (!rev->active && !rev->ready) {
+			if (ngx_add_event(rev, NGX_READ_EVENT, NGX_CLEAR_EVENT)
+				== NGX_ERROR)
+			{
+				return NGX_ERROR;
+			}
+		}
 
-        return NGX_OK;
+		return NGX_OK;
 
-    } else if (ngx_event_flags & NGX_USE_LEVEL_EVENT) {
+	}
+	else if (ngx_event_flags & NGX_USE_LEVEL_EVENT) {
 
-        /* select, poll, /dev/poll */
+		/* select, poll, /dev/poll */
 
-        if (!rev->active && !rev->ready) {
-            if (ngx_add_event(rev, NGX_READ_EVENT, NGX_LEVEL_EVENT)
-                == NGX_ERROR)
-            {
-                return NGX_ERROR;
-            }
+		if (!rev->active && !rev->ready) {
+			if (ngx_add_event(rev, NGX_READ_EVENT, NGX_LEVEL_EVENT)
+				== NGX_ERROR)
+			{
+				return NGX_ERROR;
+			}
 
-            return NGX_OK;
-        }
+			return NGX_OK;
+		}
 
-        if (rev->active && (rev->ready || (flags & NGX_CLOSE_EVENT))) {
-            if (ngx_del_event(rev, NGX_READ_EVENT, NGX_LEVEL_EVENT | flags)
-                == NGX_ERROR)
-            {
-                return NGX_ERROR;
-            }
+		if (rev->active && (rev->ready || (flags & NGX_CLOSE_EVENT))) {
+			if (ngx_del_event(rev, NGX_READ_EVENT, NGX_LEVEL_EVENT | flags)
+				== NGX_ERROR)
+			{
+				return NGX_ERROR;
+			}
 
-            return NGX_OK;
-        }
+			return NGX_OK;
+		}
 
-    } else if (ngx_event_flags & NGX_USE_EVENTPORT_EVENT) {
+	}
+	else if (ngx_event_flags & NGX_USE_EVENTPORT_EVENT) {
 
-        /* event ports */
+		/* event ports */
 
-        if (!rev->active && !rev->ready) {
-            if (ngx_add_event(rev, NGX_READ_EVENT, 0) == NGX_ERROR) {
-                return NGX_ERROR;
-            }
+		if (!rev->active && !rev->ready) {
+			if (ngx_add_event(rev, NGX_READ_EVENT, 0) == NGX_ERROR) {
+				return NGX_ERROR;
+			}
 
-            return NGX_OK;
-        }
+			return NGX_OK;
+		}
 
-        if (rev->oneshot && !rev->ready) {
-            if (ngx_del_event(rev, NGX_READ_EVENT, 0) == NGX_ERROR) {
-                return NGX_ERROR;
-            }
+		if (rev->oneshot && !rev->ready) {
+			if (ngx_del_event(rev, NGX_READ_EVENT, 0) == NGX_ERROR) {
+				return NGX_ERROR;
+			}
 
-            return NGX_OK;
-        }
-    }
+			return NGX_OK;
+		}
+	}
+	else if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
 
-    /* iocp */
+		if (!rev->active && !rev->ready) {
+			if (ngx_add_event(rev, NGX_READ_EVENT, 0) == NGX_ERROR) {
+				return NGX_ERROR;
+			}
 
-    return NGX_OK;
+			return NGX_OK;
+		}
+
+		if (rev->oneshot && rev->ready) {
+			if (ngx_del_event(rev, NGX_READ_EVENT, 0) == NGX_ERROR) {
+				return NGX_ERROR;
+			}
+
+			return NGX_OK;
+		}
+	}
+	/* iocp */
+
+	return NGX_OK;
 }
 
 
@@ -792,7 +811,7 @@ ngx_event_process_init(ngx_cycle_t *cycle)
                 continue;
             }
 
-            if (ngx_add_event(rev, 0, NGX_IOCP_ACCEPT) == NGX_ERROR) {
+            if (ngx_add_event(rev, NGX_CREATE_IOCP_EVENT, NGX_IOCP_ACCEPT) == NGX_ERROR) {
                 return NGX_ERROR;
             }
 

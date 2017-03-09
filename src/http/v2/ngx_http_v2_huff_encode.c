@@ -163,6 +163,9 @@ static ngx_http_v2_huff_encode_code_t  ngx_http_v2_huff_encode_table_lc[256] =
 #if (NGX_HAVE_GCC_BSWAP64)
 #define ngx_http_v2_huff_encode_buf(dst, buf)                                 \
     (*(uint64_t *) (dst) = __builtin_bswap64(buf))
+#elif (NGX_WIN32)
+#define ngx_http_v2_huff_encode_buf(dst, buf)                                 \
+    (*(uint64_t *) (dst) = _byteswap_uint64(buf))
 #else
 #define ngx_http_v2_huff_encode_buf(dst, buf)                                 \
     ((dst)[0] = (u_char) ((buf) >> 56),                                       \

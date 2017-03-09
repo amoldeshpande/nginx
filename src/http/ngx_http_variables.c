@@ -660,7 +660,7 @@ ngx_http_variable_request(ngx_http_request_t *r, ngx_http_variable_value_t *v,
     s = (ngx_str_t *) ((char *) r + data);
 
     if (s->data) {
-        v->len = s->len;
+        v->len = (unsigned int)s->len;
         v->valid = 1;
         v->no_cacheable = 0;
         v->not_found = 0;
@@ -704,7 +704,7 @@ ngx_http_variable_request_get_size(ngx_http_request_t *r,
         return NGX_ERROR;
     }
 
-    v->len = ngx_sprintf(v->data, "%uz", *sp) - v->data;
+    v->len =(unsigned int)( ngx_sprintf(v->data, "%uz", *sp) - v->data);
     v->valid = 1;
     v->no_cacheable = 0;
     v->not_found = 0;

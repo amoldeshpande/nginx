@@ -652,8 +652,9 @@ ngx_http_ssl_handshake(ngx_event_t *rev)
 
     if (n == -1) {
         if (err == NGX_EAGAIN) {
+#if !NGX_HAVE_IOCP
             rev->ready = 0;
-
+#endif
             if (!rev->timer_set) {
                 ngx_add_timer(rev, c->listening->post_accept_timeout);
                 ngx_reusable_connection(c, 1);

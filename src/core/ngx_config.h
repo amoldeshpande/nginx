@@ -80,6 +80,7 @@ typedef uintptr_t       ngx_uint_t;
 typedef intptr_t        ngx_flag_t;
 
 
+
 #define NGX_INT32_LEN   (sizeof("-2147483648") - 1)
 #define NGX_INT64_LEN   (sizeof("-9223372036854775808") - 1)
 

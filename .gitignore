@@ -1,0 +1,6 @@
+msvs/nginx-windows/Debug/
+*.user
+objs.linux_output/
+msvs/nginx-windows/logs/
+*.VC.db
+*.suo

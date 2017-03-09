@@ -112,7 +112,7 @@ ngx_http_degraded(ngx_http_request_t *r)
     ngx_http_degradation_main_conf_t  *dmcf;
 
     dmcf = ngx_http_get_module_main_conf(r, ngx_http_degradation_module);
-
+#if !(NGX_WIN32)
     if (dmcf->sbrk_size) {
 
         log = 0;
@@ -146,7 +146,7 @@ ngx_http_degraded(ngx_http_request_t *r)
             return 1;
         }
     }
-
+#endif
     return 0;
 }
 

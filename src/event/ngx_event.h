@@ -22,8 +22,14 @@ typedef struct {
     WSAOVERLAPPED    ovlp;
     ngx_event_t     *event;
     int              error;
+	int				 flags;
 } ngx_event_ovlp_t;
 
+typedef struct {
+	WSAOVERLAPPED ovlp;
+	void * aio_buf;
+	size_t aio_nbytes;
+}ngx_aiocb_t;
 #endif
 
 
@@ -381,7 +387,14 @@ extern ngx_uint_t            ngx_use_epoll_rdhup;
 #define NGX_LEVEL_EVENT    0
 #define NGX_ONESHOT_EVENT  1
 
+#elif (NGX_HAVE_IOCP)
+#define NGX_READ_EVENT     1
+#define NGX_WRITE_EVENT    2
+#define NGX_CREATE_IOCP_EVENT  3
+#define NGX_ACCEPT_EVENT  3
 
+#define NGX_LEVEL_EVENT    0
+#define NGX_ONESHOT_EVENT  1
 #else /* select */
 
 #define NGX_READ_EVENT     0
@@ -397,6 +410,11 @@ extern ngx_uint_t            ngx_use_epoll_rdhup;
 #define NGX_IOCP_ACCEPT      0
 #define NGX_IOCP_IO          1
 #define NGX_IOCP_CONNECT     2
+#endif
+#if (NGX_HAVE_WINSOCK_RIO)
+#define NGX_IOCP_ACCEPT     0
+#define NGX_RIO_IO          1
+#define NGX_IOCP_CONNECT    2
 #endif
 
 

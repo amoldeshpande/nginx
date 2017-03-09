@@ -191,23 +191,32 @@ ngx_iocp_done(ngx_cycle_t *cycle)
 static ngx_int_t
 ngx_iocp_add_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t key)
 {
-    ngx_connection_t  *c;
+	ngx_connection_t  *c;
 
-    c = (ngx_connection_t *) ev->data;
+	c = (ngx_connection_t *)ev->data;
 
-    c->read->active = 1;
-    c->write->active = 1;
 
-    ngx_log_debug3(NGX_LOG_DEBUG_EVENT, ev->log, 0,
-                   "iocp add: fd:%d k:%ui ov:%p", c->fd, key, &ev->ovlp);
+	/*   c->write->active = 1;*/
 
-    if (CreateIoCompletionPort((HANDLE) c->fd, iocp, key, 0) == NULL) {
-        ngx_log_error(NGX_LOG_ALERT, c->log, ngx_errno,
-                      "CreateIoCompletionPort() failed");
-        return NGX_ERROR;
-    }
-
-    return NGX_OK;
+	ngx_log_debug3(NGX_LOG_DEBUG_EVENT, ev->log, 0,
+		"iocp add: fd:%d k:%ui ov:%p", c->fd, key, &ev->ovlp);
+	if (event  == NGX_CREATE_IOCP_EVENT)
+	{
+		if (CreateIoCompletionPort((HANDLE)c->fd, iocp, key, 0) == NULL) {
+			ngx_log_error(NGX_LOG_ALERT, c->log, ngx_errno,
+				"CreateIoCompletionPort() failed");
+			return NGX_ERROR;
+		}
+	}
+	else if ( event == NGX_READ_EVENT)
+	{		
+		ssize_t ret = ngx_overlapped_wsarecv(c,c->recvbuf,ARRAYSIZE(c->recvbuf));		
+		if (ret == NGX_ERROR)
+		{
+			return ret;
+		}
+	}
+	return NGX_OK;
 }
 
 
@@ -234,7 +243,7 @@ ngx_int_t ngx_iocp_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
     ngx_uint_t flags)
 {
     int                rc;
-    u_int              key;
+    ULONG_PTR              key;
     u_long             bytes;
     ngx_err_t          err;
     ngx_msec_t         delta;
@@ -300,6 +309,7 @@ ngx_int_t ngx_iocp_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
 
 
     if (err == ERROR_NETNAME_DELETED /* the socket was closed */
+		|| err == ERROR_CONNECTION_ABORTED
         || err == ERROR_OPERATION_ABORTED /* the operation was canceled */)
     {
 
@@ -319,20 +329,21 @@ ngx_int_t ngx_iocp_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
                       "GetQueuedCompletionStatus() returned operation error");
     }
 
-    switch (key) {
+    switch (ovlp->flags) {
 
-    case NGX_IOCP_ACCEPT:
+    case NGX_ACCEPT_EVENT:
         if (bytes) {
             ev->ready = 1;
         }
         break;
 
-    case NGX_IOCP_IO:
+    case NGX_READ_EVENT:
         ev->complete = 1;
         ev->ready = 1;
         break;
 
-    case NGX_IOCP_CONNECT:
+    //case NGX_IOCP_CONNECT:
+	default:
         ev->ready = 1;
     }
 
@@ -371,8 +382,8 @@ ngx_iocp_init_conf(ngx_cycle_t *cycle, void *conf)
     ngx_iocp_conf_t *cf = conf;
 
     ngx_conf_init_value(cf->threads, 0);
-    ngx_conf_init_value(cf->post_acceptex, 10);
-    ngx_conf_init_value(cf->acceptex_read, 1);
+    ngx_conf_init_value(cf->post_acceptex, 100);
+    ngx_conf_init_value(cf->acceptex_read, 0);
 
     return NGX_CONF_OK;
 }
