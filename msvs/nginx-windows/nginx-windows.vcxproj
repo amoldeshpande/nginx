@@ -193,6 +193,7 @@
     <ClCompile Include="..\..\src\core\ngx_regex.c" />
     <ClCompile Include="..\..\src\core\ngx_resolver.c" />
     <ClCompile Include="..\..\src\core\ngx_rwlock.c" />
+    <ClCompile Include="..\..\src\core\ngx_sha1.c" />
     <ClCompile Include="..\..\src\core\ngx_shmtx.c" />
     <ClCompile Include="..\..\src\core\ngx_slab.c" />
     <ClCompile Include="..\..\src\core\ngx_spinlock.c" />

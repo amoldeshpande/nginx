@@ -182,16 +182,13 @@ struct ngx_connection_s {
 
     unsigned            need_last_buf:1;
 
-<<<<<<< HEAD
 #if (NGX_HAVE_IOCP)
     unsigned            accept_context_updated:1;
 	char				recvbuf[1024];
 #endif
 
-#if (NGX_HAVE_AIO_SENDFILE)
-=======
+
 #if (NGX_HAVE_AIO_SENDFILE || NGX_COMPAT)
->>>>>>> upstream/master
     unsigned            busy_count:2;
 #endif
 
